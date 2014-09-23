@@ -25,9 +25,15 @@ fi
 
 # Funktion zum mounten des Verzeichnisses in das lokale Dateisystem via NFS
 mountRPi () {
-	echo "Mounting Directory now..."
-	mount 192.168.178.66:/export/Serien/Serien /mnt/rpiseries
-	echo "Directory mounted successfully!"
+	echo "Checking if Directory is already mounted..."
+	if [ `stat -fc%t:%T "$target"` != `stat -fc%t:%T "$target/.."` ]; then
+		echo "$target is already mounted!"
+	else
+		echo "$target is not mounted."
+		echo "Mounting Directory now..."
+		mount 192.168.178.66:/export/Serien/Serien /mnt/rpiseries
+		echo "Directory mounted successfully!"
+	fi
 }
 
 # Funktion zum unmounten des Verzeichnisses
@@ -65,6 +71,14 @@ case $1 in
 		mountRPi
 		collectFiles
 		syncFiles
+		umountRPi
+	;;
+
+	mount)
+		mountRPi
+	;;
+
+	umount)
 		umountRPi
 	;;
 
