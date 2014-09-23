@@ -125,7 +125,7 @@ case $1 in
 	*)
 		echo "pisync called with unknown argument"
 		echo "Syntax: pisync season|sync arguments"
-		echo "Example: pisync season \"Season Folder\" \"target location (Series/Season Folder)\" \"Series Title\""
+		echo "Example: pisync season \"Showname\" \"*S01*\" \"-30\""
 		exit 1
 	;;
 esac
