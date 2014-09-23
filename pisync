@@ -19,8 +19,8 @@ age="-14"
 files="/tmp/rsyncfiles"
 
 # Check ob das Mountverzeichnis exisitert
-if [ ! -d /mnt/rpiseries ]; then
-	mkdir /mnt/rpiseries
+if [ ! -d "$target" ]; then
+	mkdir "$target"
 fi
 
 # Funktion zum mounten des Verzeichnisses in das lokale Dateisystem via NFS
@@ -31,7 +31,7 @@ mountRPi () {
 	else
 		echo "$target is not mounted."
 		echo "Mounting Directory now..."
-		mount 192.168.178.66:/export/Serien/Serien /mnt/rpiseries
+		mount 192.168.178.66:/export/Serien/Serien "$target"
 		echo "Directory mounted successfully!"
 	fi
 }
