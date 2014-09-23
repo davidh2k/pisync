@@ -19,6 +19,7 @@ age="-14"
 files="/tmp/rsyncfiles"
 searchVar1="$2"
 searchVar2="$3"
+host="nuc"
 
 # Check ob das Mountverzeichnis exisitert
 if [ ! -d "$target" ]; then
@@ -75,12 +76,26 @@ syncSeason () {
 	echo "Seasons synced successfully!"
 }
 
+updateXBMCLib () {
+	echo "Updating XBMC Library..."
+	xbmc-send --action="UpdateLibrary(video)" --host="$host"
+	echo "Updated XBMC Library!"
+}
+
+updateXBMCLibClean () {
+	echo "Updated and cleaning XBMC Library..."
+	xbmc-send --action="UpdateLibrary(video)" --host="$host"
+	xbmc-send --action="CleanLibrary(video)" --host="$host"
+	echo "Updated and cleaned XBMC Library!"
+}
+
 case $1 in
 	season)
 		mountRPi
 		collectSeason
 		syncSeason
 		umountRPi
+		updateXBMCLib
 	;;
 
 	sync)
@@ -88,6 +103,7 @@ case $1 in
 		collectFiles
 		syncFiles
 		umountRPi
+		updateXBMCLib
 	;;
 
 	mount)
