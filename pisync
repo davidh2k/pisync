@@ -14,6 +14,9 @@
 
 # Variablendeklaration
 target="/mnt/rpiseries"
+source="/media/UUID/Serien"
+age="-14"
+files="/tmp/rsyncfiles"
 
 # Check ob das Mountverzeichnis exisitert
 if [ ! -d /mnt/rpiseries ]; then
@@ -22,16 +25,32 @@ fi
 
 # Funktion zum mounten des Verzeichnisses in das lokale Dateisystem via NFS
 mountRPi () {
-echo "Mounting Directory now..."
-mount 192.168.178.66:/export/Serien/Serien /mnt/rpiseries
-echo "Directory mounted successfully!"
+	echo "Mounting Directory now..."
+	mount 192.168.178.66:/export/Serien/Serien /mnt/rpiseries
+	echo "Directory mounted successfully!"
 }
 
 # Funktion zum unmounten des Verzeichnisses
 umountRPi () {
-echo "Unmounting Directory now..."
-umount /mnt/rpiseries
-echo "Directory unmounted successfully!"
+	echo "Unmounting Directory now..."
+	umount "$target"
+	echo "Directory unmounted successfully!"
+}
+
+# Funktion zum auflisten der Dateien nicht aelter als X Tage
+collectFiles () {
+	echo "Changing directory..."
+	cd "$source"
+	echo "Directory changed. Searching for files that where modified within the last 14 days..."
+	find . -mtime "$age" > "$files"
+	echo "Files collected."
+}
+
+# Funktion zum synchronisieren der woechentlichen Serien
+syncFiles () {
+	echo "Syncing files now..."
+	rsync -Ravh --files-from="$files" . "$target"
+	echo "Files synced successfully!"
 }
 
 case $1 in
