@@ -86,6 +86,7 @@ updateXBMCLib () {
 updateXBMCLibClean () {
 	echo "Updated and cleaning XBMC Library..."
 	xbmc-send --action="UpdateLibrary(video)" --host="$host"
+	sleep 10
 	xbmc-send --action="CleanLibrary(video)" --host="$host"
 	echo "Updated and cleaned XBMC Library!"
 }
