@@ -14,7 +14,7 @@
 
 # Variablendeklaration
 target="/mnt/rpiseries"
-source="/media/UUID/Serien"
+source="/media/d3c21c66-af4b-41d4-b098-462e83fa641d/Serien"
 age="-14"
 files="/tmp/rsyncfiles"
 
@@ -59,12 +59,27 @@ syncFiles () {
 	echo "Files synced successfully!"
 }
 
+collectSeason () {
+#	echo "Writing Season with correct path to $files"
+	#example: find . -name "Scrubs*""*S04*"
+#	cd "$source"
+#	find . -name \"$2\"\"$3\" > "$files"
+	echo $2
+	echo $3
+#	cat "$files"
+}
+
+#syncSeason () {
+	#content
+#}
+
 case $1 in
 	season)
-		mountRPi
-		mkdir "$target"/"$3" -p
-		rsync -rv --relative "$2" "$target"/"$4"
-		umountRPi
+#		mountRPi
+#		mkdir "$target"/"$3" -p
+#		rsync -rv --relative "$2" "$target"/"$4"
+#		umountRPi
+		collectSeason
 	;;
 
 	sync)
@@ -83,7 +98,7 @@ case $1 in
 	;;
 
 	*)
-		echo "pisync called with unknown argument" >&2
+		echo "pisync called with unknown argument"
 		echo "Syntax: pisync season|sync arguments"
 		echo "Example: pisync season \"Season Folder\" \"target location (Series/Season Folder)\" \"Series Title\""
 		exit 1
