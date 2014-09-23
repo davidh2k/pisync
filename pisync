@@ -113,6 +113,12 @@ case $1 in
 	umount)
 		umountRPi
 	;;
+	updateLib)
+		updateXBMCLib
+	;;
+	updateClean)
+		updateXBMCLibClean
+	;;
 
 	*)
 		echo "pisync called with unknown argument"
