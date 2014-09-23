@@ -56,14 +56,16 @@ syncFiles () {
 case $1 in
 	season)
 		mountRPi
-		mkdir /mnt/rpiseries/"$3" -p
-		rsync -rv --relative "$2" /mnt/rpiseries/"$4"
+		mkdir "$target"/"$3" -p
+		rsync -rv --relative "$2" "$target"/"$4"
 		umountRPi
 	;;
 
 	sync)
-
-
+		mountRPi
+		collectFiles
+		syncFiles
+		umountRPi
 	;;
 
 	*)
