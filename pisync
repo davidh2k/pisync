@@ -69,17 +69,18 @@ collectSeason () {
 	cat "$files"
 }
 
-#syncSeason () {
-	#content
-#}
+syncSeason () {
+	echo "Syncing Season now..."
+	rsync -Ravh --files-from="$files" . "$target"
+	echo "Seasons synced successfully!"
+}
 
 case $1 in
 	season)
-#		mountRPi
-#		mkdir "$target"/"$3" -p
-#		rsync -rv --relative "$2" "$target"/"$4"
-#		umountRPi
+		mountRPi
 		collectSeason
+		syncSeason
+		umountRPi
 	;;
 
 	sync)
