@@ -16,6 +16,7 @@
 target="/mnt/rpiseries"
 source="/media/d3c21c66-af4b-41d4-b098-462e83fa641d/Serien"
 age="-14"
+ageSeason="$4"
 files="/tmp/rsyncfiles"
 searchVar1="$2"
 searchVar2="$3"
@@ -66,7 +67,7 @@ collectSeason () {
 	echo "Writing Season with correct path to $files"
 	#example: find . -name "Scrubs*""*S04*"
 	cd "$source"
-	find . -name "$searchVar1""$searchVar2" > "$files"
+	find . -type f -name "$searchVar1""$searchVar2" -mtime "$ageSeason" > "$files"
 	cat "$files"
 }
 
