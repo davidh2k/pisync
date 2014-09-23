@@ -1,0 +1,58 @@
+#!/bin/sh
+#
+# Script zum synchronisieren von Serien auf den Pi
+#
+# Einzelne Serien Staffeln
+# sowie
+# aktuelle Folgen von woechentlich ausgetrahlten Serien
+#
+# 0.1 Initial release - 2014/09/23
+# 0.2 Added case - 2014/09/23
+#
+#
+#
+
+# Variablendeklaration
+target="/mnt/rpiseries"
+
+# Check ob das Mountverzeichnis exisitert
+if [ ! -d /mnt/rpiseries ]; then
+	mkdir /mnt/rpiseries
+fi
+
+# Funktion zum mounten des Verzeichnisses in das lokale Dateisystem via NFS
+mountRPi () {
+echo "Mounting Directory now..."
+mount 192.168.178.66:/export/Serien/Serien /mnt/rpiseries
+echo "Directory mounted successfully!"
+}
+
+# Funktion zum unmounten des Verzeichnisses
+umountRPi () {
+echo "Unmounting Directory now..."
+umount /mnt/rpiseries
+echo "Directory unmounted successfully!"
+}
+
+case $1 in
+	season)
+		mountRPi
+		mkdir /mnt/rpiseries/"$3" -p
+		rsync -rv --relative "$2" /mnt/rpiseries/"$4"
+		umountRPi
+	;;
+
+	sync)
+
+
+	;;
+
+	*)
+		echo "pisync called with unknown argument" >&2
+		echo "Syntax: pisync season|sync arguments"
+		echo "Example: pisync season \"Season Folder\" \"target location (Series/Season Folder)\" \"Series Title\""
+		exit 1
+	;;
+esac
+
+exit 0
