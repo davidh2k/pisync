@@ -51,7 +51,7 @@ collectFiles () {
 	echo "Changing directory..."
 	cd "$source"
 	echo "Directory changed. Searching for files that where modified within the last 14 days..."
-	find . -mtime "$age" > "$files"
+	find . -type f -mtime "$age" > "$files"
 	echo "Files collected."
 }
 
