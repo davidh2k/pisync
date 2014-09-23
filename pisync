@@ -17,6 +17,8 @@ target="/mnt/rpiseries"
 source="/media/d3c21c66-af4b-41d4-b098-462e83fa641d/Serien"
 age="-14"
 files="/tmp/rsyncfiles"
+searchVar1="$2"
+searchVar2="$3"
 
 # Check ob das Mountverzeichnis exisitert
 if [ ! -d "$target" ]; then
@@ -60,13 +62,11 @@ syncFiles () {
 }
 
 collectSeason () {
-#	echo "Writing Season with correct path to $files"
+	echo "Writing Season with correct path to $files"
 	#example: find . -name "Scrubs*""*S04*"
-#	cd "$source"
-#	find . -name \"$2\"\"$3\" > "$files"
-	echo $2
-	echo $3
-#	cat "$files"
+	cd "$source"
+	find . -name "$searchVar1""$searchVar2" > "$files"
+	cat "$files"
 }
 
 #syncSeason () {
