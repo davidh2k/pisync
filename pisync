@@ -91,6 +91,27 @@ updateXBMCLibClean () {
 	echo "Updated and cleaned XBMC Library!"
 }
 
+readme () {
+echo "Usage
+
+pisync [option] [arguments]
+
+options:
+	sync
+		no arguments
+	season
+		\"title\" \"season\" \"modification time\"
+		\"Arrow\" \"*S01*\" \"-30\"
+	mount
+		no arguments
+	umount
+		no arguments
+	updateLib
+		no arguments
+	updateClean
+		no arguments"
+}
+
 case $1 in
 	season)
 		mountRPi
@@ -123,9 +144,8 @@ case $1 in
 	;;
 
 	*)
-		echo "pisync called with unknown argument"
-		echo "Syntax: pisync season|sync arguments"
-		echo "Example: pisync season \"Showname\" \"*S01*\" \"-30\""
+		echo "pisync called with unkown argument"
+		readme
 		exit 1
 	;;
 esac
