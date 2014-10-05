@@ -53,7 +53,7 @@ collectFiles () {
 	echo "Changing directory..."
 	cd "$source"
 	echo "Directory changed. Searching for files that where modified within the last 14 days..."
-	find . -type f -mtime "$age" | sed -f "sedIgnore" > "$files"
+	find . -type f -mtime "$age" | sed -f "$sedIgnore" > "$files"
 	echo "Files collected."
 }
 
