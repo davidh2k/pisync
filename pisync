@@ -21,6 +21,7 @@ files="/tmp/rsyncfiles"
 searchVar1="$2"
 searchVar2="$3"
 host="nuc"
+sedIgnore=/etc/default/pisyncsedignore
 
 # Check ob das Mountverzeichnis exisitert
 if [ ! -d "$target" ]; then
@@ -52,7 +53,7 @@ collectFiles () {
 	echo "Changing directory..."
 	cd "$source"
 	echo "Directory changed. Searching for files that where modified within the last 14 days..."
-	find . -type f -mtime "$age" > "$files"
+	find . -type f -mtime "$age" | sed -f "sedIgnore" > "$files"
 	echo "Files collected."
 }
 
