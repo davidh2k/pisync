@@ -131,7 +131,7 @@ case $1 in
 		umountRPi
 		updateXBMCLib
 	;;
-	drysync
+	drysync)
 		mountRPi
 		collectFiles
 		umountRPi
