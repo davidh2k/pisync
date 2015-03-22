@@ -1,0 +1,248 @@
+#!/bin/bash
+#
+# Script zum synchronisieren von Serien auf den Pi
+#
+# Einzelne Serien Staffeln
+# sowie
+# aktuelle Folgen von woechentlich ausgetrahlten Serien
+#
+# 0.1 Initial release - 2014/09/23
+# 0.2 Added case - 2014/09/23
+#
+#
+#
+
+# Variablendeklaration
+target="/mnt/rpiseries"
+targetFilme="/mnt/rpimovies"
+source="/media/d3c21c66-af4b-41d4-b098-462e83fa641d/Serien"
+sourceFilme="/media/d3c21c66-af4b-41d4-b098-462e83fa641d/Filme/Deutsch/"
+age="-50"
+ageFilme="-680"
+#ageSeason="$4"
+files="/tmp/rsyncfiles"
+filesFilme="/tmp/rsyncfilesfilme"
+#searchVar1="$2"
+#searchVar2="$3"
+host="nuc"
+sedIgnore="/etc/default/pisyncsedignore"
+sedIgnoreFilme="/etc/default/pisyncsedignorefilme"
+
+#echo "Change to ${source}"
+#cd "$source"
+
+# Check ob das Mountverzeichnis exisitert
+if [ ! -d "$target" ]; then
+        mkdir "$target"
+fi
+
+if [ ! -d "$targetFilme" ]; then
+        mkdir "$targetFilme"
+fi
+
+
+# Funktion zum mounten des Verzeichnisses in das lokale Dateisystem via NFS
+mountRPi () {
+        echo "Checking if Directory is already mounted..."
+        if [ `stat -fc%t:%T "$target"` != `stat -fc%t:%T "$target/.."` ]; then
+                echo "$target is already mounted!"
+        else
+                echo -e  "$target is not mounted.\nMounting Directory now..."
+                #todo: check auf quellexports ggf abbruchbedingung
+                mount 192.168.178.66:/export/Serien "$target"
+                if [ $? -eq 0 ]; then
+                        echo "Directory mounted successfully!"
+                else
+                        echo "Directory could not be mounted! Aborting..."
+                        exit 1
+                fi
+        fi
+}
+
+# Funktion zum mounten des Verzeichnisses in das lokale Dateisystem via NFS
+mountRPiFilme () {
+        echo "Checking if Directory is already mounted..."
+        if [ `stat -fc%t:%T "$targetFilme"` != `stat -fc%t:%T "$targetFilme/.."` ]; then
+                echo "$targetFilme is already mounted!"
+        else
+                echo -e  "$targetFilme is not mounted.\nMounting Directory now..."
+                #todo: check auf quellexports ggf abbruchbedingung
+                mount 192.168.178.66:/export/Filme "$targetFilme"
+                if [ $? -eq 0 ]; then
+                        echo "Directory mounted successfully!"
+                else
+                        echo "Directory could not be mounted! Aborting..."
+                        exit 1
+                fi
+        fi
+}
+
+
+# Funktion zum unmounten des Verzeichnisses
+umountRPi () {
+        echo "Unmounting Directory now..."
+        umount "$target"
+        echo "Directory unmounted successfully!"
+}
+
+# Funktion zum unmounten des Verzeichnisses
+umountRPiFilme () {
+        echo "Unmounting Directory now..."
+        umount "$targetFilme"
+        echo "Directory unmounted successfully!"
+}
+
+
+# Funktion zum auflisten der Dateien nicht aelter als X Tage
+collectFiles () {
+        echo "Changing directory..."
+        cd "$source"
+        echo "Directory changed. Searching for files that where modified within the last 14 days..."
+        find . -type f -mtime "$age" | sed -f "$sedIgnore" > "$files"
+        echo "Files collected."
+}
+
+# Funktion zum auflisten der Dateien nicht aelter als X Tage
+collectFilesFilme () {
+        echo "Changing directory..."
+        cd "$sourceFilme"
+        echo "Directory changed. Searching for files that where modified within the last 100 days..."
+        find . -type f -mtime "$ageFilme" | sed -f "$sedIgnoreFilme" > "$filesFilme"
+        echo "Files collected."
+}
+
+
+# Funktion zum synchronisieren der woechentlichen Serien
+syncFiles () {
+
+        if [ "$1" == "dryrun" ]; then
+                echo "Syncing files now...(dryrun)"
+                rsync -Ranvh --files-from="$files" . "$target"
+        else
+                echo "Syncing files now..."
+                rsync -Ravh --files-from="$files" . "$target"
+                [ $? == "0" ] && echo "Files synced successfully!" || echo "Filetransfer ended with errors"
+        fi
+}
+
+# Funktion zum synchronisieren der Filme
+syncFilesFilme () {
+
+        if [ "$1" == "dryrun" ]; then
+                echo "Syncing files now...(dryrun)"
+                rsync -Ranvh --files-from="$filesFilme" . "$targetFilme"
+        else
+                echo "Syncing files now..."
+                rsync -Ravh --files-from="$filesFilme" . "$targetFilme"
+                [ $? == "0" ] && echo "Files synced successfully!" || echo "Filetransfer ended with errors"
+        fi
+}
+
+collectSeason () {
+        echo "Writing Season with correct path to $files"
+        #example: find . -name "Scrubs*""*S04*"
+        cd "$source"
+        find . -type f -name "$1*$2*" -mtime "$3" | tee "$files"
+#       cat "$files"
+}
+
+syncSeason () {
+        echo "Syncing Season now..."
+        rsync -Ravh --files-from="$files" . "$target"
+        [ $? == "0" ] && echo "Season synced successfully!" || echo "Filetransfer ended with errors"
+}
+
+updateXBMCLib () {
+        echo "Updating XBMC Library..."
+        xbmc-send --action="UpdateLibrary(video)" --host="$host"
+        echo "Updated XBMC Library!"
+}
+
+updateXBMCLibClean () {
+        echo "Updated and cleaning XBMC Library..."
+        xbmc-send --action="UpdateLibrary(video)" --host="$host"
+        sleep 10
+        xbmc-send --action="CleanLibrary(video)" --host="$host"
+        echo "Updated and cleaned XBMC Library!"
+}
+
+readme () {
+echo "Usage
+
+pisync [option] [arguments]
+
+options:
+        sync
+                no arguments
+        drysync
+                no arguments
+        season
+                \"title\" \"season\" \"modification time\"
+                \"Arrow\" \"*S01*\" \"-30\"
+        mount
+                no arguments
+        umount
+                no arguments
+        updateLib
+                no arguments
+        cleanLib
+                no arguments"
+}
+
+case $1 in
+        season)
+                mountRPi
+                collectSeason $2 $3 $4
+                syncSeason
+                umountRPi
+                updateXBMCLib
+        ;;
+
+        sync)
+                mountRPi
+                collectFiles
+                syncFiles
+                umountRPi
+                updateXBMCLib
+        ;;
+        syncfilme)
+                mountRPiFilme
+                collectFilesFilme
+                syncFilesFilme
+                umountRPiFilme
+                updateXBMCLib
+        ;;
+        drysync)
+#               mountRPi
+                collectFiles
+                syncFiles "dryrun"
+#               umountRPi
+        ;;
+        drysyncfilme)
+                collectFilesFilme
+                syncFilesFilme "dryrun"
+        ;;
+        mount)
+                mountRPi
+                mountRPiFilme
+        ;;
+
+        umount)
+                umountRPi
+                umountRPiFilme
+        ;;
+        updateLib)
+                updateXBMCLib
+        ;;
+        cleanLib)
+                updateXBMCLibClean
+        ;;
+
+        *)
+                echo "pisync called with unkown argument"
+                readme
+                exit 1
+        ;;
+esac
+
+exit 0
